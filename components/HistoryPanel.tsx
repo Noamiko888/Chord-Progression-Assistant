@@ -35,33 +35,33 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ savedProgressions, onDelete
   }, [savedProgressions, searchTerm, sortBy]);
 
   return (
-    <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-slate-800/90 backdrop-blur-md shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-      <div className="flex flex-col h-full">
-        <header className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h2 className="text-xl font-bold text-white">Saved Progressions</h2>
-          <button onClick={onClose} className="p-1 rounded-full text-slate-400 hover:bg-slate-700 hover:text-white">
+    <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-white/80 dark:bg-slate-800/90 backdrop-blur-md shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className="flex flex-col h-full text-slate-800 dark:text-slate-200">
+        <header className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Saved Progressions</h2>
+          <button onClick={onClose} className="p-1 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white">
             <XIcon className="h-6 w-6" />
           </button>
         </header>
 
-        <div className="p-4 border-b border-slate-700">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-700">
           <div className="relative mb-2">
             <input
               type="text"
               placeholder="Search history..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-700 text-white rounded-md pl-9 pr-3 py-2 focus:ring-sky-500 focus:border-sky-500"
+              className="w-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-md pl-9 pr-3 py-2 border border-slate-300 dark:border-slate-600 focus:ring-sky-500 focus:border-sky-500"
             />
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-400" />
           </div>
           <div className="flex items-center gap-2">
-            <label htmlFor="sort-by" className="text-sm text-slate-400">Sort by:</label>
+            <label htmlFor="sort-by" className="text-sm text-slate-600 dark:text-slate-400">Sort by:</label>
             <select
               id="sort-by"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-slate-700 text-white rounded-md py-1 text-sm border-slate-600 focus:ring-sky-500 focus:border-sky-500"
+              className="bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-md py-1 text-sm border-slate-300 dark:border-slate-600 focus:ring-sky-500 focus:border-sky-500"
             >
               <option value="date-desc">Newest First</option>
               <option value="date-asc">Oldest First</option>
@@ -74,10 +74,10 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ savedProgressions, onDelete
           {filteredAndSortedProgressions.length > 0 ? (
             <ul className="space-y-3">
               {filteredAndSortedProgressions.map(p => (
-                <li key={p.id} className="bg-slate-700/50 p-3 rounded-lg flex items-center justify-between">
+                <li key={p.id} className="bg-white dark:bg-slate-700/50 p-3 rounded-lg flex items-center justify-between border border-slate-200 dark:border-transparent">
                   <div>
-                    <p className="font-bold text-sky-400">{p.key} ({p.mood})</p>
-                    <p className="text-sm text-slate-300 font-mono">{p.chords.join(' - ')}</p>
+                    <p className="font-bold text-sky-600 dark:text-sky-400">{p.key} ({p.mood})</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 font-mono">{p.chords.join(' - ')}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -89,7 +89,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ savedProgressions, onDelete
                     <button
                       onClick={() => onDelete(p.id)}
                       title="Delete"
-                      className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-600 rounded-full transition-colors"
+                      className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-full transition-colors"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -98,7 +98,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ savedProgressions, onDelete
               ))}
             </ul>
           ) : (
-            <div className="text-center text-slate-400 pt-10">
+            <div className="text-center text-slate-500 dark:text-slate-400 pt-10">
               <p>No saved progressions found.</p>
               <p className="text-sm mt-1">Generate and save some to see them here!</p>
             </div>

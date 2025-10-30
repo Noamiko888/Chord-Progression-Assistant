@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -7,7 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Chord Progression Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  <script type="importmap">
+    <script>
+      // Explicitly configure Tailwind to use the 'class' strategy for dark mode.
+      // This is often the default, but being explicit can resolve some CDN-related issues.
+      tailwind.config = {
+        darkMode: 'class',
+      }
+    </script>
+    <script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
@@ -17,8 +23,19 @@
   }
 }
 </script>
+    <script>
+      // Prevents FOUC (Flash of Unstyled Content) when loading the theme
+      (function() {
+        const theme = localStorage.getItem('chordAppTheme') || 'dark';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
 </head>
-  <body class="bg-slate-900">
+  <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
