@@ -102,3 +102,22 @@ export const DrumIcon = ({ className }: { className?: string }) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Zm-3-9a3 3 0 1 0 6 0 3 3 0 0 0-6 0Zm1.5-4.5 3 3m-3 0 3-3" />
     </svg>
 );
+
+export const EyeOffIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.243 4.243-4.243-4.243" />
+    </svg>
+);
+
+export const GuitarIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="m6.115 5.19.319 1.913A6 6 0 0 0 8.11 10.36L9.75 12l-.387.775c-.217.433-.132.956.21 1.298l1.348 1.348c.21.21.329.497.329.795v1.089c0 .426.24.815.622 1.006l.153.076c.433.217.956.132 1.298-.21l.775-.387 1.64 1.64A6 6 0 0 0 18.087 21l1.913.319c.915.152 1.84-.367 2.15-1.222l1.089-3.047c.24-.676-.118-1.428-.8-1.631l-1.348-.402-1.64-1.64c-.433-.217-.956-.132-1.298.21l-.387.775-1.2-1.2a3.375 3.375 0 0 1-.41-4.714l1.64-1.64.402-1.348c.203-.682-.155-1.433-.831-1.631l-3.047-1.089c-.855-.303-1.81.21-2.15 1.087L9 3.913l-1.64 1.64c-.433.217-.956.132-1.298-.21z" />
+    </svg>
+);
+
+export const PianoIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v16.5h16.5V3.75H3.75ZM9 9.75h.75v3.75H9v-3.75Zm2.25 0h.75v3.75h-.75v-3.75Zm2.25 0h.75v3.75h-.75v-3.75Zm2.25 0h.75v3.75h-.75v-3.75Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 5.25V9h.75V5.25H6Zm3.75 0V9h.75V5.25h-.75Zm3.75 0V9h.75V5.25h-.75Zm3.75 0V9h.75V5.25h-.75Z" />
+    </svg>
+);

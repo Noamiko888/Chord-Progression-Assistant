@@ -2,12 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import type { ChordProgression, Melody } from '../types';
 import { 
     MusicKeyIcon, SparklesIcon, LoadingSpinnerIcon, InfoIcon, BookmarkIcon, MusicNoteIcon, 
-    PlayIcon, StopIcon, LoopIcon, MetronomeIcon, DrumIcon 
+    PlayIcon, StopIcon, LoopIcon, MetronomeIcon, DrumIcon, EyeOffIcon, GuitarIcon, PianoIcon
 } from './icons';
 import { ROOT_NOTES, MODES, MELODY_STYLES } from '../constants';
 import { playChord, playMetronomeClick } from '../utils/audio';
 import { playDrumSound } from '../utils/drums';
 import { getChordColor } from '../utils/colors';
+import { GuitarChordDiagram } from './GuitarChordDiagram';
+import { PianoChordDiagram } from './PianoChordDiagram';
+
 
 interface ProgressionCardProps {
   progression: ChordProgression;
@@ -18,6 +21,8 @@ interface ProgressionCardProps {
   isProcessing: boolean;
   isSaved: boolean;
 }
+
+type VisualAid = 'none' | 'guitar' | 'piano';
 
 const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenerateVariation, onTranspose, onGenerateMelody, onSave, isProcessing, isSaved }) => {
   const [showTranspose, setShowTranspose] = useState(false);
@@ -34,6 +39,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenera
   const [isDrumsOn, setIsDrumsOn] = useState(false);
   const [tempo, setTempo] = useState(120);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [visualAid, setVisualAid] = useState<VisualAid>('none');
   const playbackRef = useRef({ beat: 0, intervalId: null as number | null });
 
 
@@ -127,7 +133,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenera
     setShowMelody(false);
   }
 
-  const PlaybackToggleButton: React.FC<{active: boolean, onToggle: () => void, children: React.ReactNode, title: string}> = ({ active, onToggle, children, title }) => (
+  const ToggleButton: React.FC<{active: boolean, onToggle: () => void, children: React.ReactNode, title: string}> = ({ active, onToggle, children, title }) => (
       <button 
         onClick={onToggle}
         title={title}
@@ -216,33 +222,49 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenera
           const chordColors = getChordColor(chord);
           const isHighlighted = highlightedIndex === index;
           return (
-             <button
-                key={`${chord}-${index}`}
-                onClick={() => playChord(chord)}
-                className={`p-4 rounded-lg text-center focus:outline-none transition-all duration-150 ease-in-out shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-100 cursor-pointer group border ${chordColors.button} ${isHighlighted ? 'ring-2 ring-offset-2 ring-sky-400 ring-offset-white dark:ring-offset-slate-800' : 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800'}`}
-                aria-label={`Play chord ${chord}`}
-              >
-                <div className={`text-2xl font-bold transition-colors ${chordColors.text}`}>{chord}</div>
-                <div className="text-lg text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">{progression.romanNumerals[index]}</div>
-            </button>
+            <div key={`${chord}-${index}`} className="flex flex-col items-center gap-2">
+                 <button
+                    onClick={() => playChord(chord)}
+                    className={`w-full p-4 rounded-lg text-center focus:outline-none transition-all duration-150 ease-in-out shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-100 cursor-pointer group border ${chordColors.button} ${isHighlighted ? 'ring-2 ring-offset-2 ring-sky-400 ring-offset-white dark:ring-offset-slate-800' : 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800'}`}
+                    aria-label={`Play chord ${chord}`}
+                  >
+                    <div className={`text-2xl font-bold transition-colors ${chordColors.text}`}>{chord}</div>
+                    <div className="text-lg text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">{progression.romanNumerals[index]}</div>
+                </button>
+                <div className="w-full">
+                    {visualAid === 'guitar' && <GuitarChordDiagram chordName={chord} />}
+                    {visualAid === 'piano' && <PianoChordDiagram chordName={chord} />}
+                </div>
+            </div>
           );
         })}
       </div>
-
+      
       <div className="mt-4 p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
               <button onClick={() => setIsPlaying(!isPlaying)} className="p-2 bg-sky-600 hover:bg-sky-700 text-white rounded-full transition-transform active:scale-90">
                   {isPlaying ? <StopIcon className="h-6 w-6"/> : <PlayIcon className="h-6 w-6"/>}
               </button>
-              <PlaybackToggleButton active={isLooping} onToggle={() => setIsLooping(!isLooping)} title="Toggle Loop">
+              <ToggleButton active={isLooping} onToggle={() => setIsLooping(!isLooping)} title="Toggle Loop">
                   <LoopIcon className="h-5 w-5"/>
-              </PlaybackToggleButton>
-               <PlaybackToggleButton active={isMetronomeOn} onToggle={() => setIsMetronomeOn(!isMetronomeOn)} title="Toggle Metronome">
+              </ToggleButton>
+               <ToggleButton active={isMetronomeOn} onToggle={() => setIsMetronomeOn(!isMetronomeOn)} title="Toggle Metronome">
                   <MetronomeIcon className="h-5 w-5"/>
-              </PlaybackToggleButton>
-              <PlaybackToggleButton active={isDrumsOn} onToggle={() => setIsDrumsOn(!isDrumsOn)} title="Toggle Drums">
+              </ToggleButton>
+              <ToggleButton active={isDrumsOn} onToggle={() => setIsDrumsOn(!isDrumsOn)} title="Toggle Drums">
                   <DrumIcon className="h-5 w-5"/>
-              </PlaybackToggleButton>
+              </ToggleButton>
+          </div>
+          <div className="flex items-center gap-2">
+             <ToggleButton active={visualAid === 'none'} onToggle={() => setVisualAid('none')} title="Hide Visual Aid">
+                  <EyeOffIcon className="h-5 w-5"/>
+              </ToggleButton>
+              <ToggleButton active={visualAid === 'guitar'} onToggle={() => setVisualAid('guitar')} title="Show Guitar Chords">
+                  <GuitarIcon className="h-5 w-5"/>
+              </ToggleButton>
+               <ToggleButton active={visualAid === 'piano'} onToggle={() => setVisualAid('piano')} title="Show Piano Chords">
+                  <PianoIcon className="h-5 w-5"/>
+              </ToggleButton>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
               <label htmlFor={`tempo-${progression.id}`} className="font-medium">Tempo</label>

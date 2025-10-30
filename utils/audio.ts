@@ -38,7 +38,7 @@ const midiToFrequency = (midi: number): number => {
  * @param chord The chord name string.
  * @returns An array of MIDI note numbers representing the chord.
  */
-const getChordMidiNotes = (chord: string): number[] => {
+export const getChordMidiNotes = (chord: string): number[] => {
   const rootMatch = chord.match(/^[A-G][#b]?/);
   if (!rootMatch) return [];
 
