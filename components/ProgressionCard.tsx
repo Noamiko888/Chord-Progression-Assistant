@@ -20,11 +20,16 @@ interface ProgressionCardProps {
   onSave: (id: string) => void;
   isProcessing: boolean;
   isSaved: boolean;
+  isPlaying: boolean;
+  onTogglePlay: (id: string) => void;
 }
 
 type VisualAid = 'none' | 'guitar' | 'piano';
 
-const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenerateVariation, onTranspose, onGenerateMelody, onSave, isProcessing, isSaved }) => {
+const ProgressionCard: React.FC<ProgressionCardProps> = ({ 
+    progression, onGenerateVariation, onTranspose, onGenerateMelody, onSave, 
+    isProcessing, isSaved, isPlaying, onTogglePlay 
+}) => {
   const [showTranspose, setShowTranspose] = useState(false);
   const [showMelody, setShowMelody] = useState(false);
   const [melodyStyle, setMelodyStyle] = useState(MELODY_STYLES[0]);
@@ -33,7 +38,6 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenera
   const popoverRef = useRef<HTMLDivElement>(null);
 
   // Playback state
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(true);
   const [isMetronomeOn, setIsMetronomeOn] = useState(false);
   const [isDrumsOn, setIsDrumsOn] = useState(false);
@@ -91,7 +95,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenera
                 if (isLooping) {
                     playbackRef.current.beat = 0;
                 } else {
-                    setIsPlaying(false); // This will trigger cleanup in this effect
+                    onTogglePlay(progression.id); // Signal parent to stop playback
                 }
             } else {
                 playbackRef.current.beat = nextBeat;
@@ -118,7 +122,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenera
             clearInterval(playbackRef.current.intervalId);
         }
     };
-  }, [isPlaying, isLooping, isMetronomeOn, isDrumsOn, tempo, progression.chords]);
+  }, [isPlaying, isLooping, isMetronomeOn, isDrumsOn, tempo, progression.chords, onTogglePlay, progression.id]);
 
   const handleTransposeClick = () => {
     const newKey = `${transposeRoot} ${transposeMode}`;
@@ -227,6 +231,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenera
                     onClick={() => playChord(chord)}
                     className={`w-full p-4 rounded-lg text-center focus:outline-none transition-all duration-150 ease-in-out shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-100 cursor-pointer group border ${chordColors.button} ${isHighlighted ? 'ring-2 ring-offset-2 ring-sky-400 ring-offset-white dark:ring-offset-slate-800' : 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800'}`}
                     aria-label={`Play chord ${chord}`}
+                    title={`Play ${chord} chord`}
                   >
                     <div className={`text-2xl font-bold transition-colors ${chordColors.text}`}>{chord}</div>
                     <div className="text-lg text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">{progression.romanNumerals[index]}</div>
@@ -242,7 +247,11 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({ progression, onGenera
       
       <div className="mt-4 p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
-              <button onClick={() => setIsPlaying(!isPlaying)} className="p-2 bg-sky-600 hover:bg-sky-700 text-white rounded-full transition-transform active:scale-90">
+              <button 
+                onClick={() => onTogglePlay(progression.id)} 
+                title={isPlaying ? "Stop Progression" : "Play Progression"}
+                className="p-2 bg-sky-600 hover:bg-sky-700 text-white rounded-full transition-transform active:scale-90"
+              >
                   {isPlaying ? <StopIcon className="h-6 w-6"/> : <PlayIcon className="h-6 w-6"/>}
               </button>
               <ToggleButton active={isLooping} onToggle={() => setIsLooping(!isLooping)} title="Toggle Loop">

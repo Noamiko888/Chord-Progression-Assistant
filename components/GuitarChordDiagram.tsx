@@ -47,7 +47,7 @@ export const GuitarChordDiagram: React.FC<GuitarChordDiagramProps> = ({ chordNam
   const height = cellHeight * numFrets + 20;
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[100px] h-auto text-slate-800 dark:text-slate-200">
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[100px] h-auto mx-auto text-slate-800 dark:text-slate-200">
       {/* Strings */}
       {Array.from({ length: numStrings }).map((_, i) => (
         <line

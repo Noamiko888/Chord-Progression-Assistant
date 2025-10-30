@@ -23,6 +23,8 @@ const App: React.FC = () => {
   const [savedProgressions, setSavedProgressions] = useState<ChordProgression[]>([]);
   const [showHistory, setShowHistory] = useState<boolean>(false);
   
+  const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
+  
   const [theme, toggleTheme] = useTheme();
 
   useEffect(() => {
@@ -35,6 +37,11 @@ const App: React.FC = () => {
       console.error("Failed to load history from localStorage", e);
     }
   }, []);
+  
+  const handleTogglePlay = (id: string) => {
+    setCurrentlyPlayingId(prevId => (prevId === id ? null : id));
+  };
+
 
   const updateSavedProgressions = (newSaved: ChordProgression[]) => {
     setSavedProgressions(newSaved);
@@ -49,6 +56,7 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setProgressions([]);
+    setCurrentlyPlayingId(null); // Stop playback on new generation
     try {
       const results = await apiFunc();
       successCallback(results);
@@ -156,6 +164,7 @@ const App: React.FC = () => {
     setProgressions([progression]);
     setShowHistory(false);
     setError(null);
+    setCurrentlyPlayingId(null);
   };
 
   const TabButton: React.FC<{active: boolean, onClick: () => void, children: React.ReactNode}> = ({ active, onClick, children }) => (
@@ -233,6 +242,8 @@ const App: React.FC = () => {
                     onSave={handleSaveProgression}
                     isProcessing={processingId === p.id}
                     isSaved={savedProgressions.some(sp => sp.id === p.id)}
+                    isPlaying={currentlyPlayingId === p.id}
+                    onTogglePlay={handleTogglePlay}
                   />
                 ))}
               </div>

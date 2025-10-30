@@ -39,7 +39,11 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ savedProgressions, onDelete
       <div className="flex flex-col h-full text-slate-800 dark:text-slate-200">
         <header className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Saved Progressions</h2>
-          <button onClick={onClose} className="p-1 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white">
+          <button 
+            onClick={onClose} 
+            title="Close Panel"
+            className="p-1 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white"
+          >
             <XIcon className="h-6 w-6" />
           </button>
         </header>
