@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { ChordProgression, Melody } from '../types';
 import { 
     MusicKeyIcon, SparklesIcon, LoadingSpinnerIcon, InfoIcon, BookmarkIcon, MusicNoteIcon, 
     PlayIcon, StopIcon, LoopIcon, MetronomeIcon, DrumIcon, EyeOffIcon, GuitarIcon, PianoIcon
 } from './icons';
 import { ROOT_NOTES, MODES, MELODY_STYLES } from '../constants';
-import { playChord, playMetronomeClick } from '../utils/audio';
+import { playChord, playSingleNote, playMetronomeClick, getChordMidiNotes, midiToNoteNameWithOctave } from '../utils/audio';
 import { playDrumSound } from '../utils/drums';
 import { getChordColor } from '../utils/colors';
 import { GuitarChordDiagram } from './GuitarChordDiagram';
@@ -22,13 +22,18 @@ interface ProgressionCardProps {
   isSaved: boolean;
   isPlaying: boolean;
   onTogglePlay: (id: string) => void;
+  globalTempo: number; // New prop for global tempo
+  setGlobalTempo: (tempo: number) => void; // New prop for setting global tempo
+  instrumentType: 'synth' | 'piano'; // New prop for instrument type
+  setInstrumentType: (type: 'synth' | 'piano') => void; // New prop for setting instrument type
 }
 
 type VisualAid = 'none' | 'guitar' | 'piano';
 
 const ProgressionCard: React.FC<ProgressionCardProps> = ({ 
     progression, onGenerateVariation, onTranspose, onGenerateMelody, onSave, 
-    isProcessing, isSaved, isPlaying, onTogglePlay 
+    isProcessing, isSaved, isPlaying, onTogglePlay, 
+    globalTempo, setGlobalTempo, instrumentType, setInstrumentType
 }) => {
   const [showTranspose, setShowTranspose] = useState(false);
   const [showMelody, setShowMelody] = useState(false);
@@ -41,10 +46,20 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
   const [isLooping, setIsLooping] = useState(true);
   const [isMetronomeOn, setIsMetronomeOn] = useState(false);
   const [isDrumsOn, setIsDrumsOn] = useState(false);
-  const [tempo, setTempo] = useState(120);
-  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [isArpeggioChordsOn, setIsArpeggioChordsOn] = useState(false); // New state for arpeggiated chords
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null); // Current chord index
+  const [highlightedMelodyNoteIndex, setHighlightedMelodyNoteIndex] = useState<number | null>(null); // Current melody note index
   const [visualAid, setVisualAid] = useState<VisualAid>('none');
-  const playbackRef = useRef({ beat: 0, intervalId: null as number | null });
+
+  // Playback reference object to keep track of indices and interval ID
+  const playbackRef = useRef({ 
+      eightNoteTick: 0, // Master tick count for eighth notes
+      chordIndex: 0,
+      melodyIndex: 0,
+      arpeggioNoteIndex: 0, // For arpeggiated chords
+      currentChordMidiNotes: [] as number[], // Pre-computed MIDI notes for current chord
+      intervalId: null as number | null 
+  });
 
 
   useEffect(() => {
@@ -64,56 +79,125 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
     }
   }, []);
 
+  // Reset melody highlight when melody changes
+  useEffect(() => {
+    setHighlightedMelodyNoteIndex(null);
+  }, [progression.melody]);
+
+  // Pre-compute MIDI notes for chords
+  const precomputedChordMidiNotes = useMemo(() => {
+    return progression.chords.map(chord => getChordMidiNotes(chord));
+  }, [progression.chords]);
+
   // Main playback logic effect
   useEffect(() => {
     if (isPlaying) {
-        const beatsPerChord = 4; // Assume 4/4 time, one chord per measure
-        const beatDuration = 60000 / tempo;
+        // We'll use an eighth-note as the fundamental tick unit
+        const eighthNoteDurationMs = (60000 / globalTempo) / 2; // Milliseconds per eighth note
+        const eighthNoteDurationSeconds = eighthNoteDurationMs / 1000; // Convert to seconds
+        const beatsPerChord = 4; // Assume 4/4 time, one chord per measure = 4 beats = 8 eighth-notes
 
         const tick = () => {
-            const currentBeat = playbackRef.current.beat;
-            const chordIndex = Math.floor(currentBeat / beatsPerChord);
-            const isFirstBeatOfChord = currentBeat % beatsPerChord === 0;
+            const currentEightNoteTick = playbackRef.current.eightNoteTick;
+            const currentChordIndex = Math.floor(currentEightNoteTick / beatsPerChord / 2); // 2 eighth notes per beat
+            const eightNoteInChordCycle = currentEightNoteTick % (beatsPerChord * 2);
 
-            if (isFirstBeatOfChord) {
-                playChord(progression.chords[chordIndex]);
-                setHighlightedIndex(chordIndex);
-            }
-            
-            if (isMetronomeOn) {
-                playMetronomeClick(isFirstBeatOfChord);
-            }
-
-            if (isDrumsOn) {
-                playDrumSound(currentBeat);
+            // --- Chord Playback ---
+            if (currentChordIndex !== playbackRef.current.chordIndex) {
+                // New chord
+                playbackRef.current.chordIndex = currentChordIndex;
+                playbackRef.current.arpeggioNoteIndex = 0; // Reset arpeggio index for new chord
+                playbackRef.current.currentChordMidiNotes = precomputedChordMidiNotes[currentChordIndex] || [];
+                setHighlightedIndex(currentChordIndex);
             }
 
-            const nextBeat = currentBeat + 1;
-            const totalBeats = progression.chords.length * beatsPerChord;
+            if (isArpeggioChordsOn) {
+                const midiNotesToArpeggiate = playbackRef.current.currentChordMidiNotes;
+                if (midiNotesToArpeggiate.length > 0) {
+                    const arpeggioNoteIndex = playbackRef.current.arpeggioNoteIndex;
+                    const midiNoteToPlay = midiNotesToArpeggiate[arpeggioNoteIndex % midiNotesToArpeggiate.length];
+                    
+                    const noteNameForArpeggio = midiToNoteNameWithOctave(midiNoteToPlay); // Correctly convert MIDI to note string with octave
+                    playSingleNote(noteNameForArpeggio, instrumentType, eighthNoteDurationSeconds * 0.8); // Play with duration
 
-            if (nextBeat >= totalBeats) {
+                    playbackRef.current.arpeggioNoteIndex = (arpeggioNoteIndex + 1) % midiNotesToArpeggiate.length;
+                    if (playbackRef.current.arpeggioNoteIndex === 0) {
+                        // If we finished arpeggiating the current chord, restart or move to next
+                        // For a continuous arpeggio, this might not need a full reset, depends on desired effect
+                    }
+                }
+            } else {
+                // Block chord playback (only on the first eight-note of a new chord)
+                if (eightNoteInChordCycle === 0) {
+                    playChord(progression.chords[currentChordIndex], instrumentType, eighthNoteDurationSeconds * 0.6); // Sustain block chords for 60% of an eighth note
+                }
+            }
+
+            // --- Melody Playback ---
+            if (progression.melody && progression.melody.notes.length > 0) {
+                const currentMelodyNoteIndex = playbackRef.current.melodyIndex;
+                if (currentMelodyNoteIndex < progression.melody.notes.length) {
+                    const melodyNote = progression.melody.notes[currentMelodyNoteIndex];
+                    // Introduce slight duration variation for "soul"
+                    const melodyNoteDurationSeconds = eighthNoteDurationSeconds * (0.3 + Math.random() * 0.2); 
+                    playSingleNote(melodyNote, instrumentType, melodyNoteDurationSeconds);
+                    setHighlightedMelodyNoteIndex(currentMelodyNoteIndex);
+                    playbackRef.current.melodyIndex++;
+                }
+            }
+
+            // --- Metronome and Drums ---
+            // Play metronome/drums on quarter notes (every 2nd eighth-note tick)
+            const isQuarterNote = eightNoteInChordCycle % 2 === 0;
+            if (isMetronomeOn && isQuarterNote) {
+                playMetronomeClick(eightNoteInChordCycle === 0); // Accent on the first beat of the measure
+            }
+            if (isDrumsOn && isQuarterNote) {
+                playDrumSound(Math.floor(currentEightNoteTick / 2)); // Drums based on quarter notes
+            }
+
+            // --- Advance Tick ---
+            let nextEightNoteTick = currentEightNoteTick + 1;
+            const totalEightNotes = progression.chords.length * beatsPerChord * 2;
+
+            if (nextEightNoteTick >= totalEightNotes) {
                 if (isLooping) {
-                    playbackRef.current.beat = 0;
+                    playbackRef.current.eightNoteTick = 0;
+                    playbackRef.current.melodyIndex = 0; // Reset melody index on loop
                 } else {
                     onTogglePlay(progression.id); // Signal parent to stop playback
                 }
             } else {
-                playbackRef.current.beat = nextBeat;
+                playbackRef.current.eightNoteTick = nextEightNoteTick;
             }
         };
         
-        playbackRef.current.beat = 0;
-        tick(); 
-
-        playbackRef.current.intervalId = window.setInterval(tick, beatDuration);
+        // Initialize playback state
+        playbackRef.current.eightNoteTick = 0;
+        playbackRef.current.chordIndex = 0;
+        playbackRef.current.melodyIndex = 0;
+        playbackRef.current.arpeggioNoteIndex = 0;
+        playbackRef.current.currentChordMidiNotes = precomputedChordMidiNotes[0] || [];
+        
+        // Clear previous interval if any and set a new one
+        if (playbackRef.current.intervalId) {
+            clearInterval(playbackRef.current.intervalId);
+        }
+        playbackRef.current.intervalId = window.setInterval(tick, eighthNoteDurationMs);
 
     } else {
+        // Stop playback
         if (playbackRef.current.intervalId) {
             clearInterval(playbackRef.current.intervalId);
             playbackRef.current.intervalId = null;
         }
-        playbackRef.current.beat = 0;
+        playbackRef.current.eightNoteTick = 0;
+        playbackRef.current.chordIndex = 0;
+        playbackRef.current.melodyIndex = 0;
+        playbackRef.current.arpeggioNoteIndex = 0;
+        playbackRef.current.currentChordMidiNotes = [];
         setHighlightedIndex(null);
+        setHighlightedMelodyNoteIndex(null);
     }
     
     // Effect cleanup
@@ -122,7 +206,11 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
             clearInterval(playbackRef.current.intervalId);
         }
     };
-  }, [isPlaying, isLooping, isMetronomeOn, isDrumsOn, tempo, progression.chords, onTogglePlay, progression.id]);
+  }, [
+      isPlaying, isLooping, isMetronomeOn, isDrumsOn, isArpeggioChordsOn, // New dependency
+      globalTempo, progression.chords, progression.melody, onTogglePlay, 
+      progression.id, instrumentType, precomputedChordMidiNotes // New dependencies
+  ]);
 
   const handleTransposeClick = () => {
     const newKey = `${transposeRoot} ${transposeMode}`;
@@ -228,7 +316,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
           return (
             <div key={`${chord}-${index}`} className="flex flex-col items-center gap-2">
                  <button
-                    onClick={() => playChord(chord)}
+                    onClick={() => playChord(chord, instrumentType)} // Pass instrumentType
                     className={`w-full p-4 rounded-lg text-center focus:outline-none transition-all duration-150 ease-in-out shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-100 cursor-pointer group border ${chordColors.button} ${isHighlighted ? 'ring-2 ring-offset-2 ring-sky-400 ring-offset-white dark:ring-offset-slate-800' : 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800'}`}
                     aria-label={`Play chord ${chord}`}
                     title={`Play ${chord} chord`}
@@ -263,6 +351,18 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
               <ToggleButton active={isDrumsOn} onToggle={() => setIsDrumsOn(!isDrumsOn)} title="Toggle Drums">
                   <DrumIcon className="h-5 w-5"/>
               </ToggleButton>
+              <ToggleButton active={isArpeggioChordsOn} onToggle={() => setIsArpeggioChordsOn(!isArpeggioChordsOn)} title="Toggle Arpeggiated Chords">
+                  Arpeggio
+              </ToggleButton>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Sound:</span>
+            <ToggleButton active={instrumentType === 'synth'} onToggle={() => setInstrumentType('synth')} title="Synth Sound">
+                Synth
+            </ToggleButton>
+            <ToggleButton active={instrumentType === 'piano'} onToggle={() => setInstrumentType('piano')} title="Piano Sound">
+                Piano
+            </ToggleButton>
           </div>
           <div className="flex items-center gap-2">
              <ToggleButton active={visualAid === 'none'} onToggle={() => setVisualAid('none')} title="Hide Visual Aid">
@@ -282,11 +382,11 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
                 type="range" 
                 min="40" 
                 max="240" 
-                value={tempo} 
-                onChange={e => setTempo(Number(e.target.value))}
+                value={globalTempo} // Use globalTempo
+                onChange={e => setGlobalTempo(Number(e.target.value))} // Set globalTempo
                 className="w-24 accent-sky-500"
               />
-              <span className="font-mono w-8 text-center">{tempo}</span>
+              <span className="font-mono w-8 text-center">{globalTempo}</span> {/* Display globalTempo */}
               <span>BPM</span>
           </div>
       </div>
@@ -299,8 +399,18 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
       {progression.melody && (
         <div className="mt-2 flex flex-col gap-3">
             <h4 className="font-bold text-sky-700 dark:text-sky-300">Generated Melody ({progression.melody.style})</h4>
-            <div className="bg-slate-200 dark:bg-slate-900 p-4 rounded-lg text-center text-sky-700 dark:text-sky-400 font-mono tracking-wider">
-                {progression.melody.notes.join(' - ')}
+            <div className="bg-slate-200 dark:bg-slate-900 p-4 rounded-lg text-center font-mono tracking-wider flex flex-wrap justify-center gap-x-2 gap-y-1">
+                {progression.melody.notes.map((note, idx) => (
+                    <span 
+                        key={`melody-note-${idx}`}
+                        className={`text-sky-700 dark:text-sky-400 text-lg sm:text-xl transition-colors duration-75 ${
+                            highlightedMelodyNoteIndex === idx ? 'font-bold text-sky-900 dark:text-sky-100 scale-105' : ''
+                        }`}
+                    >
+                        {note}
+                        {idx < progression.melody.notes.length - 1 && <span className="text-slate-400 dark:text-slate-600 px-1">-</span>}
+                    </span>
+                ))}
             </div>
              <div className="bg-slate-100 dark:bg-slate-700/50 p-4 rounded-lg flex items-start gap-3">
                 <MusicNoteIcon className="h-5 w-5 text-sky-600 dark:text-sky-400 flex-shrink-0 mt-0.5" />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { getChordMidiNotes } from '../utils/audio';
+import { getChordMidiNotes, midiToNoteName } from '../utils/audio'; // Import midiToNoteName
 import { ROOT_NOTES } from '../constants';
 
 interface PianoChordDiagramProps {
@@ -27,14 +27,10 @@ const KEY_MAP = [
   { type: 'white', xOffset: 6 }, // B
 ];
 
-const midiToNoteName = (midi: number): string => {
-  return ROOT_NOTES[midi % 12];
-};
-
 export const PianoChordDiagram: React.FC<PianoChordDiagramProps> = ({ chordName }) => {
-  const midiNotes = getChordMidiNotes(chordName);
+  const rawMidiNotes = getChordMidiNotes(chordName);
 
-  if (midiNotes.length === 0) {
+  if (rawMidiNotes.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700/50 rounded-md p-2">
         Diagram not available
@@ -42,18 +38,39 @@ export const PianoChordDiagram: React.FC<PianoChordDiagramProps> = ({ chordName 
     );
   }
 
-  const startMidiNote = 48; // Start drawing from C3
+  const startMidiNote = 48; // Start drawing from C3 (MIDI 48)
   const numOctaves = 2;
-  const numKeysToRender = numOctaves * 12;
-  const width = numOctaves * 7 * WHITE_KEY_WIDTH;
+  const correctedNumKeysToRender = numOctaves * 12; // Total semitones (keys) in 2 octaves
+  const endMidiNote = startMidiNote + correctedNumKeysToRender - 1; // End at B4 (MIDI 71)
+
+  let adjustedMidiNotes = [...rawMidiNotes]; // Create a mutable copy
+
+  const lowestRawNote = Math.min(...rawMidiNotes);
+  const highestRawNote = Math.max(...rawMidiNotes);
+
+  let octaveShift = 0;
+
+  // If the highest note is above the visible range, shift down
+  if (highestRawNote > endMidiNote) {
+    octaveShift = -12 * Math.ceil((highestRawNote - endMidiNote) / 12);
+  } 
+  // If the lowest note is below the visible range (and we haven't already shifted down)
+  else if (lowestRawNote < startMidiNote) {
+    octaveShift = 12 * Math.ceil((startMidiNote - lowestRawNote) / 12);
+  }
+
+  // Apply the calculated octave shift to all notes
+  adjustedMidiNotes = adjustedMidiNotes.map(n => n + octaveShift);
+
+  const width = numOctaves * 7 * WHITE_KEY_WIDTH; // Visual width based on white keys
 
   const whiteKeys = [];
   const blackKeys = [];
   const noteLabels = [];
 
-  for (let i = 0; i < numKeysToRender; i++) {
-    const midiNote = startMidiNote + i;
-    const isHighlighted = midiNotes.includes(midiNote);
+  for (let i = 0; i < correctedNumKeysToRender; i++) {
+    const midiNote = startMidiNote + i; // The MIDI note for the current key slot on the diagram
+    const isHighlighted = adjustedMidiNotes.includes(midiNote); // Check adjusted notes
     const noteInOctave = midiNote % 12;
     const keyInfo = KEY_MAP[noteInOctave];
     
@@ -61,8 +78,8 @@ export const PianoChordDiagram: React.FC<PianoChordDiagramProps> = ({ chordName 
     const startOctave = Math.floor(startMidiNote / 12);
     const relativeOctave = octave - startOctave;
     
-    const octaveOffset = relativeOctave * 7 * WHITE_KEY_WIDTH;
-    
+    const octaveOffset = relativeOctave * 7 * WHITE_KEY_WIDTH; // 7 white keys per octave
+
     if (keyInfo.type === 'white') {
         const x = octaveOffset + keyInfo.xOffset * WHITE_KEY_WIDTH;
         whiteKeys.push(
@@ -89,7 +106,7 @@ export const PianoChordDiagram: React.FC<PianoChordDiagramProps> = ({ chordName 
             );
         }
     } else { // black key
-        const x = octaveOffset + keyInfo.xOffset * WHITE_KEY_WIDTH;
+        const x = octaveOffset + keyInfo.xOffset * WHITE_KEY_WIDTH - (BLACK_KEY_WIDTH / 2); // Center black key over its xOffset
         blackKeys.push(
             <rect
             key={`midi-black-${midiNote}`}

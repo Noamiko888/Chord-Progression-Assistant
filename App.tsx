@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { generateProgressions, generateVariation, transposeProgression, generateMelody, searchByMood } from './services/geminiService';
 import type { ChordProgression } from './types';
@@ -24,6 +25,10 @@ const App: React.FC = () => {
   const [showHistory, setShowHistory] = useState<boolean>(false);
   
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
+
+  // Global playback settings
+  const [globalTempo, setGlobalTempo] = useState(120);
+  const [instrumentType, setInstrumentType] = useState<'synth' | 'piano'>('piano');
   
   const [theme, toggleTheme] = useTheme();
 
@@ -244,6 +249,10 @@ const App: React.FC = () => {
                     isSaved={savedProgressions.some(sp => sp.id === p.id)}
                     isPlaying={currentlyPlayingId === p.id}
                     onTogglePlay={handleTogglePlay}
+                    globalTempo={globalTempo}
+                    setGlobalTempo={setGlobalTempo}
+                    instrumentType={instrumentType}
+                    setInstrumentType={setInstrumentType}
                   />
                 ))}
               </div>
