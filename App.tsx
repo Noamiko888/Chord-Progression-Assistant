@@ -181,14 +181,14 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans p-4 sm:p-8 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans p-3 sm:p-6 md:p-8 transition-colors duration-300">
       <div className="container mx-auto max-w-4xl">
         <header className="text-center mb-8">
-            <div className="flex justify-center items-center gap-4 mb-4">
-                 <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-600 dark:from-sky-400 dark:to-blue-500">
+            <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 mb-4">
+                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-600 dark:from-sky-400 dark:to-blue-500">
                     AI Chord Progression Assistant
                 </h1>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                     <button onClick={() => setIsTunerOpen(true)} className="relative p-2 rounded-full text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white transition-colors" title="Open Tuner">
                         <TunerIcon className="h-6 w-6"/>
                     </button>
