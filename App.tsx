@@ -7,8 +7,9 @@ import Controls from './components/Controls';
 import ProgressionCard from './components/ProgressionCard';
 import MoodSearch from './components/MoodSearch';
 import HistoryPanel from './components/HistoryPanel';
-import { LoadingSpinnerIcon, HistoryIcon, SunIcon, MoonIcon } from './components/icons';
+import { LoadingSpinnerIcon, HistoryIcon, SunIcon, MoonIcon, TunerIcon } from './components/icons';
 import { useTheme } from './hooks/useTheme';
+import Tuner from './components/Tuner';
 
 type ViewMode = 'key' | 'mood';
 
@@ -31,6 +32,7 @@ const App: React.FC = () => {
   const [instrumentType, setInstrumentType] = useState<'synth' | 'piano'>('piano');
   
   const [theme, toggleTheme] = useTheme();
+  const [isTunerOpen, setIsTunerOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -187,6 +189,9 @@ const App: React.FC = () => {
                     AI Chord Progression Assistant
                 </h1>
                 <div className="flex items-center gap-2">
+                    <button onClick={() => setIsTunerOpen(true)} className="relative p-2 rounded-full text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white transition-colors" title="Open Tuner">
+                        <TunerIcon className="h-6 w-6"/>
+                    </button>
                     <button onClick={toggleTheme} className="relative p-2 rounded-full text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white transition-colors" title="Toggle Theme">
                        {theme === 'dark' ? <SunIcon className="h-6 w-6"/> : <MoonIcon className="h-6 w-6"/>}
                     </button>
@@ -282,6 +287,7 @@ const App: React.FC = () => {
         onDelete={handleDeleteFromHistory}
         onLoad={handleLoadFromHistory}
       />
+      <Tuner isOpen={isTunerOpen} onClose={() => setIsTunerOpen(false)} />
     </div>
   );
 };

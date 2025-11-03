@@ -121,3 +121,9 @@ export const PianoIcon = ({ className }: { className?: string }) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 5.25V9h.75V5.25H6Zm3.75 0V9h.75V5.25h-.75Zm3.75 0V9h.75V5.25h-.75Zm3.75 0V9h.75V5.25h-.75Z" />
     </svg>
 );
+
+export const TunerIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 12.75V15m3-3.75V15m-6-3.75V15m3-6.75V6m0 3.75a3 3 0 1 0-6 0 3 3 0 0 0 6 0ZM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+);
