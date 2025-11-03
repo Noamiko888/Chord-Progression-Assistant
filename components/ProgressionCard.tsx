@@ -317,7 +317,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
             <div key={`${chord}-${index}`} className="flex flex-col items-center gap-2">
                  <button
                     onClick={() => playChord(chord, instrumentType)} // Pass instrumentType
-                    className={`w-full p-4 rounded-lg text-center focus:outline-none transition-all duration-150 ease-in-out shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-100 cursor-pointer group border ${chordColors.button} ${isHighlighted ? 'ring-2 ring-offset-2 ring-sky-400 ring-offset-white dark:ring-offset-slate-800' : 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800'}`}
+                    className={`w-full p-4 rounded-lg text-center focus:outline-none transition-all duration-150 ease-in-out shadow-sm hover:shadow-md dark:shadow-inner dark:shadow-black/20 hover:scale-[1.03] active:scale-100 cursor-pointer group border ${chordColors.button} ${isHighlighted ? 'ring-2 ring-offset-2 ring-sky-400 ring-offset-white dark:ring-offset-slate-800' : 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800'}`}
                     aria-label={`Play chord ${chord}`}
                     title={`Play ${chord} chord`}
                   >
