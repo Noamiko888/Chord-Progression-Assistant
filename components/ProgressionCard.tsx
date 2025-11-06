@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { ChordProgression, Melody } from '../types';
 import { 
@@ -136,16 +137,28 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
 
             // --- Melody Playback ---
             if (progression.melody && progression.melody.notes.length > 0) {
-                const currentMelodyNoteIndex = playbackRef.current.melodyIndex;
-                if (currentMelodyNoteIndex < progression.melody.notes.length) {
-                    const melodyNote = progression.melody.notes[currentMelodyNoteIndex];
-                    // Introduce slight duration variation for "soul"
-                    const melodyNoteDurationSeconds = eighthNoteDurationSeconds * (0.3 + Math.random() * 0.2); 
-                    playSingleNote(melodyNote, instrumentType, melodyNoteDurationSeconds);
-                    setHighlightedMelodyNoteIndex(currentMelodyNoteIndex);
-                    playbackRef.current.melodyIndex++;
+                const totalMelodyNotes = progression.melody.notes.length;
+                const totalEightNotesInProgression = progression.chords.length * 8; // Each chord is one measure of 8 eighth-notes
+                const ticksPerMelodyNote = totalEightNotesInProgression / totalMelodyNotes;
+                
+                // Calculate the tick number when the NEXT melody note should play
+                const nextMelodyNoteTick = playbackRef.current.melodyIndex * ticksPerMelodyNote;
+
+                if (currentEightNoteTick >= nextMelodyNoteTick) {
+                    const currentMelodyNoteIndex = playbackRef.current.melodyIndex;
+                    if (currentMelodyNoteIndex < totalMelodyNotes) {
+                        const melodyNote = progression.melody.notes[currentMelodyNoteIndex];
+                        // Sustain note for most of its duration, with a little space before the next
+                        const melodyNoteDurationSeconds = eighthNoteDurationSeconds * (ticksPerMelodyNote * 0.9);
+                        playSingleNote(melodyNote, instrumentType, melodyNoteDurationSeconds);
+                        setHighlightedMelodyNoteIndex(currentMelodyNoteIndex);
+                        
+                        // Advance to the next melody note
+                        playbackRef.current.melodyIndex++;
+                    }
                 }
             }
+
 
             // --- Metronome and Drums ---
             // Play metronome/drums on quarter notes (every 2nd eighth-note tick)
