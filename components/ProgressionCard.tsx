@@ -1,5 +1,3 @@
-
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { ChordProgression, Melody } from '../types';
 import { 
@@ -137,28 +135,16 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
 
             // --- Melody Playback ---
             if (progression.melody && progression.melody.notes.length > 0) {
-                const totalMelodyNotes = progression.melody.notes.length;
-                const totalEightNotesInProgression = progression.chords.length * 8; // Each chord is one measure of 8 eighth-notes
-                const ticksPerMelodyNote = totalEightNotesInProgression / totalMelodyNotes;
-                
-                // Calculate the tick number when the NEXT melody note should play
-                const nextMelodyNoteTick = playbackRef.current.melodyIndex * ticksPerMelodyNote;
-
-                if (currentEightNoteTick >= nextMelodyNoteTick) {
-                    const currentMelodyNoteIndex = playbackRef.current.melodyIndex;
-                    if (currentMelodyNoteIndex < totalMelodyNotes) {
-                        const melodyNote = progression.melody.notes[currentMelodyNoteIndex];
-                        // Sustain note for most of its duration, with a little space before the next
-                        const melodyNoteDurationSeconds = eighthNoteDurationSeconds * (ticksPerMelodyNote * 0.9);
-                        playSingleNote(melodyNote, instrumentType, melodyNoteDurationSeconds);
-                        setHighlightedMelodyNoteIndex(currentMelodyNoteIndex);
-                        
-                        // Advance to the next melody note
-                        playbackRef.current.melodyIndex++;
-                    }
+                const currentMelodyNoteIndex = playbackRef.current.melodyIndex;
+                if (currentMelodyNoteIndex < progression.melody.notes.length) {
+                    const melodyNote = progression.melody.notes[currentMelodyNoteIndex];
+                    // Introduce slight duration variation for "soul"
+                    const melodyNoteDurationSeconds = eighthNoteDurationSeconds * (0.3 + Math.random() * 0.2); 
+                    playSingleNote(melodyNote, instrumentType, melodyNoteDurationSeconds);
+                    setHighlightedMelodyNoteIndex(currentMelodyNoteIndex);
+                    playbackRef.current.melodyIndex++;
                 }
             }
-
 
             // --- Metronome and Drums ---
             // Play metronome/drums on quarter notes (every 2nd eighth-note tick)
@@ -331,7 +317,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
             <div key={`${chord}-${index}`} className="flex flex-col items-center gap-2">
                  <button
                     onClick={() => playChord(chord, instrumentType)} // Pass instrumentType
-                    className={`w-full p-4 rounded-lg text-center focus:outline-none transition-all duration-150 ease-in-out shadow-sm hover:shadow-md dark:shadow-inner dark:shadow-black/20 hover:scale-[1.03] active:scale-100 cursor-pointer group border ${chordColors.button} ${isHighlighted ? 'ring-2 ring-offset-2 ring-sky-400 ring-offset-white dark:ring-offset-slate-800' : 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800'}`}
+                    className={`w-full p-4 rounded-lg text-center focus:outline-none transition-all duration-150 ease-in-out shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-100 cursor-pointer group border ${chordColors.button} ${isHighlighted ? 'ring-2 ring-offset-2 ring-sky-400 ring-offset-white dark:ring-offset-slate-800' : 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800'}`}
                     aria-label={`Play chord ${chord}`}
                     title={`Play ${chord} chord`}
                   >
@@ -347,63 +333,61 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
         })}
       </div>
       
-      <div className="mt-4 p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
-          <div className="flex items-center justify-center sm:justify-between flex-wrap gap-x-6 gap-y-4">
-            <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => onTogglePlay(progression.id)} 
-                  title={isPlaying ? "Stop Progression" : "Play Progression"}
-                  className="p-2 bg-sky-600 hover:bg-sky-700 text-white rounded-full transition-transform active:scale-90"
-                >
-                    {isPlaying ? <StopIcon className="h-6 w-6"/> : <PlayIcon className="h-6 w-6"/>}
-                </button>
-                <ToggleButton active={isLooping} onToggle={() => setIsLooping(!isLooping)} title="Toggle Loop">
-                    <LoopIcon className="h-5 w-5"/>
-                </ToggleButton>
-                <ToggleButton active={isMetronomeOn} onToggle={() => setIsMetronomeOn(!isMetronomeOn)} title="Toggle Metronome">
-                    <MetronomeIcon className="h-5 w-5"/>
-                </ToggleButton>
-                <ToggleButton active={isDrumsOn} onToggle={() => setIsDrumsOn(!isDrumsOn)} title="Toggle Drums">
-                    <DrumIcon className="h-5 w-5"/>
-                </ToggleButton>
-                <ToggleButton active={isArpeggioChordsOn} onToggle={() => setIsArpeggioChordsOn(!isArpeggioChordsOn)} title="Toggle Arpeggiated Chords">
-                    Arpeggio
-                </ToggleButton>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:inline">Sound:</span>
-              <ToggleButton active={instrumentType === 'synth'} onToggle={() => setInstrumentType('synth')} title="Synth Sound">
-                  Synth
+      <div className="mt-4 p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+              <button 
+                onClick={() => onTogglePlay(progression.id)} 
+                title={isPlaying ? "Stop Progression" : "Play Progression"}
+                className="p-2 bg-sky-600 hover:bg-sky-700 text-white rounded-full transition-transform active:scale-90"
+              >
+                  {isPlaying ? <StopIcon className="h-6 w-6"/> : <PlayIcon className="h-6 w-6"/>}
+              </button>
+              <ToggleButton active={isLooping} onToggle={() => setIsLooping(!isLooping)} title="Toggle Loop">
+                  <LoopIcon className="h-5 w-5"/>
               </ToggleButton>
-              <ToggleButton active={instrumentType === 'piano'} onToggle={() => setInstrumentType('piano')} title="Piano Sound">
-                  Piano
+               <ToggleButton active={isMetronomeOn} onToggle={() => setIsMetronomeOn(!isMetronomeOn)} title="Toggle Metronome">
+                  <MetronomeIcon className="h-5 w-5"/>
               </ToggleButton>
-            </div>
-            <div className="flex items-center gap-2">
-              <ToggleButton active={visualAid === 'none'} onToggle={() => setVisualAid('none')} title="Hide Visual Aid">
-                    <EyeOffIcon className="h-5 w-5"/>
-                </ToggleButton>
-                <ToggleButton active={visualAid === 'guitar'} onToggle={() => setVisualAid('guitar')} title="Show Guitar Chords">
-                    <GuitarIcon className="h-5 w-5"/>
-                </ToggleButton>
-                <ToggleButton active={visualAid === 'piano'} onToggle={() => setVisualAid('piano')} title="Show Piano Chords">
-                    <PianoIcon className="h-5 w-5"/>
-                </ToggleButton>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                <label htmlFor={`tempo-${progression.id}`} className="font-medium">Tempo</label>
-                <input 
-                  id={`tempo-${progression.id}`}
-                  type="range" 
-                  min="40" 
-                  max="240" 
-                  value={globalTempo} // Use globalTempo
-                  onChange={e => setGlobalTempo(Number(e.target.value))} // Set globalTempo
-                  className="w-24 accent-sky-500"
-                />
-                <span className="font-mono w-8 text-center">{globalTempo}</span> {/* Display globalTempo */}
-                <span>BPM</span>
-            </div>
+              <ToggleButton active={isDrumsOn} onToggle={() => setIsDrumsOn(!isDrumsOn)} title="Toggle Drums">
+                  <DrumIcon className="h-5 w-5"/>
+              </ToggleButton>
+              <ToggleButton active={isArpeggioChordsOn} onToggle={() => setIsArpeggioChordsOn(!isArpeggioChordsOn)} title="Toggle Arpeggiated Chords">
+                  Arpeggio
+              </ToggleButton>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Sound:</span>
+            <ToggleButton active={instrumentType === 'synth'} onToggle={() => setInstrumentType('synth')} title="Synth Sound">
+                Synth
+            </ToggleButton>
+            <ToggleButton active={instrumentType === 'piano'} onToggle={() => setInstrumentType('piano')} title="Piano Sound">
+                Piano
+            </ToggleButton>
+          </div>
+          <div className="flex items-center gap-2">
+             <ToggleButton active={visualAid === 'none'} onToggle={() => setVisualAid('none')} title="Hide Visual Aid">
+                  <EyeOffIcon className="h-5 w-5"/>
+              </ToggleButton>
+              <ToggleButton active={visualAid === 'guitar'} onToggle={() => setVisualAid('guitar')} title="Show Guitar Chords">
+                  <GuitarIcon className="h-5 w-5"/>
+              </ToggleButton>
+               <ToggleButton active={visualAid === 'piano'} onToggle={() => setVisualAid('piano')} title="Show Piano Chords">
+                  <PianoIcon className="h-5 w-5"/>
+              </ToggleButton>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <label htmlFor={`tempo-${progression.id}`} className="font-medium">Tempo</label>
+              <input 
+                id={`tempo-${progression.id}`}
+                type="range" 
+                min="40" 
+                max="240" 
+                value={globalTempo} // Use globalTempo
+                onChange={e => setGlobalTempo(Number(e.target.value))} // Set globalTempo
+                className="w-24 accent-sky-500"
+              />
+              <span className="font-mono w-8 text-center">{globalTempo}</span> {/* Display globalTempo */}
+              <span>BPM</span>
           </div>
       </div>
       

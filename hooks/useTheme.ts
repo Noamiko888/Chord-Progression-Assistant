@@ -3,16 +3,22 @@ import { useState, useEffect, useCallback } from 'react';
 type Theme = 'light' | 'dark';
 
 export const useTheme = (): [Theme, () => void] => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const storedTheme = localStorage.getItem('chordAppTheme') as Theme;
-    // If a theme is stored, use it. Otherwise, default to 'light'.
-    // This ignores the system preference, as requested.
-    return storedTheme || 'light';
-  });
+  const [theme, setTheme] = useState<Theme>('dark'); // Default to dark
 
   useEffect(() => {
-    // This effect runs whenever the theme state changes.
-    // It applies the correct class to the document root and updates localStorage.
+    // On initial mount, read the theme from localStorage or system preference
+    const storedTheme = localStorage.getItem('chordAppTheme') as Theme;
+    if (storedTheme) {
+      setTheme(storedTheme);
+    } else {
+      // Fallback to system preference if no theme is stored
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(prefersDark ? 'dark' : 'light');
+    }
+  }, []);
+
+  useEffect(() => {
+    // Apply the theme class to the root element and save to localStorage
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
