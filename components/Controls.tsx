@@ -1,6 +1,6 @@
 import React from 'react';
 import { ROOT_NOTES, MODES } from '../constants';
-import { LoadingSpinnerIcon } from './icons';
+import { LoadingSpinnerIcon, SparklesIcon } from './icons';
 
 interface ControlsProps {
   rootNote: string;
@@ -13,48 +13,57 @@ interface ControlsProps {
 
 const Controls: React.FC<ControlsProps> = ({ rootNote, setRootNote, mode, setMode, onGenerate, isLoading }) => {
   return (
-    <div className="bg-slate-300/20 dark:bg-slate-800/50 backdrop-blur-sm p-4 rounded-xl shadow-lg w-full max-w-2xl border border-slate-300/30 dark:border-transparent">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label htmlFor="root-note" className="block text-sm font-medium text-sky-700 dark:text-sky-300 mb-1">Root Note</label>
-          <select
-            id="root-note"
-            value={rootNote}
-            onChange={(e) => setRootNote(e.target.value)}
-            disabled={isLoading}
-            className="w-full bg-white dark:bg-slate-700 text-slate-900 dark:text-white border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
-          >
-            {ROOT_NOTES.map(note => <option key={note} value={note}>{note}</option>)}
-          </select>
+    <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-2xl mx-auto border border-white/40 dark:border-white/10 ring-1 ring-black/5">
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-end">
+        <div className="sm:col-span-3">
+          <label htmlFor="root-note" className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 ml-1">Key</label>
+          <div className="relative">
+            <select
+                id="root-note"
+                value={rootNote}
+                onChange={(e) => setRootNote(e.target.value)}
+                disabled={isLoading}
+                className="w-full appearance-none bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-2xl py-3 px-4 shadow-inner focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent transition-all outline-none text-center font-semibold cursor-pointer hover:bg-white dark:hover:bg-white/10"
+            >
+                {ROOT_NOTES.map(note => <option key={note} value={note}>{note}</option>)}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500 dark:text-slate-400">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            </div>
+          </div>
         </div>
-        <div>
-          <label htmlFor="mode" className="block text-sm font-medium text-sky-700 dark:text-sky-300 mb-1">Mode</label>
-          <select
-            id="mode"
-            value={mode}
-            onChange={(e) => setMode(e.target.value)}
-            disabled={isLoading}
-            className="w-full bg-white dark:bg-slate-700 text-slate-900 dark:text-white border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
-          >
-            {MODES.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
+        
+        <div className="sm:col-span-5">
+          <label htmlFor="mode" className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 ml-1">Mode</label>
+           <div className="relative">
+            <select
+                id="mode"
+                value={mode}
+                onChange={(e) => setMode(e.target.value)}
+                disabled={isLoading}
+                className="w-full appearance-none bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-2xl py-3 px-4 shadow-inner focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent transition-all outline-none font-semibold cursor-pointer hover:bg-white dark:hover:bg-white/10"
+            >
+                {MODES.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500 dark:text-slate-400">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            </div>
+          </div>
         </div>
-        <div className="sm:self-end">
+
+        <div className="sm:col-span-4">
           <button
             onClick={onGenerate}
             disabled={isLoading}
-            className="w-full h-full min-h-[50px] flex items-center justify-center bg-sky-500 hover:bg-sky-600 disabled:bg-sky-500/50 dark:disabled:bg-sky-800 disabled:text-slate-100 dark:disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md transition-all duration-200 shadow-lg hover:shadow-sky-500/30 text-center"
+            className="group w-full h-[50px] flex items-center justify-center gap-2 bg-gradient-to-r from-[#fbbf24] to-amber-500 hover:from-[#fcd34d] hover:to-amber-400 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:from-slate-800 dark:disabled:to-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-black font-bold py-3 px-6 rounded-2xl transition-all duration-300 shadow-[0_4px_20px_rgba(251,191,36,0.3)] hover:shadow-[0_4px_25px_rgba(251,191,36,0.5)] transform hover:-translate-y-0.5 active:translate-y-0"
           >
             {isLoading ? (
-              <>
-                <LoadingSpinnerIcon className="h-5 w-5 mr-2" />
-                <span>Generating...</span>
-              </>
+              <LoadingSpinnerIcon className="h-5 w-5 animate-spin text-black/70" />
             ) : (
-                <div className="leading-tight">
-                    <div>Generate</div>
-                    <div>Progressions</div>
-                </div>
+                <>
+                <span>Generate</span>
+                <SparklesIcon className="h-5 w-5 text-black/70 group-hover:rotate-12 transition-transform" />
+                </>
             )}
           </button>
         </div>

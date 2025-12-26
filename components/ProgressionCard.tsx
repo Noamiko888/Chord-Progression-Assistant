@@ -121,10 +121,6 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
                     playSingleNote(noteNameForArpeggio, instrumentType, eighthNoteDurationSeconds * 0.8); // Play with duration
 
                     playbackRef.current.arpeggioNoteIndex = (arpeggioNoteIndex + 1) % midiNotesToArpeggiate.length;
-                    if (playbackRef.current.arpeggioNoteIndex === 0) {
-                        // If we finished arpeggiating the current chord, restart or move to next
-                        // For a continuous arpeggio, this might not need a full reset, depends on desired effect
-                    }
                 }
             } else {
                 // Block chord playback (only on the first eight-note of a new chord)
@@ -229,24 +225,36 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
       <button 
         onClick={onToggle}
         title={title}
-        className={`p-2 rounded-full transition-colors ${active ? 'bg-sky-500 text-white' : 'bg-slate-300 dark:bg-slate-600 hover:bg-slate-400/80 dark:hover:bg-slate-500 text-slate-600 dark:text-slate-300'}`}
+        className={`p-2.5 rounded-xl transition-all duration-200 border ${active ? 'bg-[#fbbf24] border-[#fbbf24] text-black shadow-[0_0_15px_rgba(251,191,36,0.3)]' : 'bg-transparent border-slate-300 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-white/10 hover:text-slate-700 dark:hover:text-white'}`}
       >
         {children}
       </button>
   );
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 flex flex-col gap-4 border border-slate-200 dark:border-slate-700 transition-all hover:border-sky-500/50 dark:hover:shadow-sky-500/10">
-      <div className="flex justify-between items-start">
+    <div className={`group relative bg-white/40 dark:bg-black/40 backdrop-blur-2xl rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col gap-8 border border-white/50 dark:border-white/10 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] ${isPlaying ? 'ring-1 ring-[#fbbf24]/50' : ''}`}>
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">{progression.key}</h3>
-          <span className="bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">{progression.mood}</span>
+          <div className="flex items-center gap-3">
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{progression.key}</h3>
+            {isPlaying && (
+                <div className="flex gap-1 h-3 items-end">
+                    <div className="w-1 bg-[#fbbf24] animate-[pulse_1s_ease-in-out_infinite] h-full"></div>
+                    <div className="w-1 bg-[#fbbf24] animate-[pulse_1.2s_ease-in-out_infinite] h-2/3"></div>
+                    <div className="w-1 bg-[#fbbf24] animate-[pulse_0.8s_ease-in-out_infinite] h-3/4"></div>
+                </div>
+            )}
+          </div>
+          <span className="inline-block mt-2 text-sm font-semibold tracking-wide uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#fbbf24] to-amber-600">{progression.mood}</span>
         </div>
+        
         <div className="flex gap-2 relative" ref={popoverRef}>
            <button
             onClick={() => onSave(progression.id)}
             disabled={isProcessing}
-            className={`p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full transition-colors disabled:opacity-50 ${isSaved ? 'text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300' : 'text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white'}`}
+            className={`p-3 rounded-full transition-all border ${isSaved ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.2)]' : 'bg-transparent border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-white/10'}`}
             title={isSaved ? "Remove from History" : "Save to History"}
           >
             <BookmarkIcon className="h-5 w-5" solid={isSaved} />
@@ -254,7 +262,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
            <button
             onClick={() => { setShowTranspose(false); setShowMelody(!showMelody); }}
             disabled={isProcessing}
-            className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white transition-colors disabled:opacity-50"
+            className="p-3 bg-transparent hover:bg-white/10 border border-slate-200 dark:border-white/10 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white transition-all disabled:opacity-50"
             title="Generate Melody"
           >
             <MusicNoteIcon className="h-5 w-5" />
@@ -262,7 +270,7 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
           <button
             onClick={() => onGenerateVariation(progression.id)}
             disabled={isProcessing}
-            className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-wait"
+            className="p-3 bg-transparent hover:bg-white/10 border border-slate-200 dark:border-white/10 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white transition-all disabled:opacity-50 disabled:cursor-wait"
             title="Generate Variation"
           >
             {isProcessing ? <LoadingSpinnerIcon className="h-5 w-5" /> : <SparklesIcon className="h-5 w-5" />}
@@ -270,38 +278,39 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
           <button
             onClick={() => { setShowMelody(false); setShowTranspose(!showTranspose); }}
             disabled={isProcessing}
-            className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white transition-colors disabled:opacity-50"
+            className="p-3 bg-transparent hover:bg-white/10 border border-slate-200 dark:border-white/10 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white transition-all disabled:opacity-50"
             title="Transpose Key"
           >
             <MusicKeyIcon className="h-5 w-5" />
           </button>
           
+          {/* Popovers */}
           {showTranspose && (
-            <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-700 p-3 rounded-lg shadow-2xl z-10 w-64 border border-slate-200 dark:border-slate-600">
-              <p className="text-sm font-semibold mb-2 text-slate-900 dark:text-white">Transpose to:</p>
-              <div className="flex gap-2 mb-2">
-                <select value={transposeRoot} onChange={e => setTransposeRoot(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-600 text-slate-900 dark:text-white border-slate-300 dark:border-slate-500 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500">
+            <div className="absolute top-full right-0 mt-3 bg-white dark:bg-[#0f172a] p-4 rounded-2xl shadow-2xl z-20 w-64 border border-slate-100 dark:border-white/10 ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-200">
+              <p className="text-xs font-bold uppercase tracking-wider mb-3 text-slate-500 dark:text-slate-400">Transpose to</p>
+              <div className="flex gap-2 mb-3">
+                <select value={transposeRoot} onChange={e => setTransposeRoot(e.target.value)} className="w-full bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl text-sm p-2 focus:ring-2 focus:ring-[#fbbf24] outline-none">
                   {ROOT_NOTES.map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
-                <select value={transposeMode} onChange={e => setTransposeMode(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-600 text-slate-900 dark:text-white border-slate-300 dark:border-slate-500 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500">
+                <select value={transposeMode} onChange={e => setTransposeMode(e.target.value)} className="w-full bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl text-sm p-2 focus:ring-2 focus:ring-[#fbbf24] outline-none">
                   {MODES.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
-              <button onClick={handleTransposeClick} className="w-full bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold py-1 px-3 rounded-md transition-colors">
+              <button onClick={handleTransposeClick} className="w-full bg-[#fbbf24] hover:bg-[#fcd34d] text-black text-sm font-bold py-2 px-3 rounded-xl transition-colors shadow-lg shadow-amber-500/20">
                 Apply
               </button>
             </div>
           )}
 
           {showMelody && (
-             <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-700 p-3 rounded-lg shadow-2xl z-10 w-64 border border-slate-200 dark:border-slate-600">
-              <p className="text-sm font-semibold mb-2 text-slate-900 dark:text-white">Melody Style:</p>
-              <div className="flex gap-2 mb-2">
-                <select value={melodyStyle} onChange={e => setMelodyStyle(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-600 text-slate-900 dark:text-white border-slate-300 dark:border-slate-500 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500">
+             <div className="absolute top-full right-0 mt-3 bg-white dark:bg-[#0f172a] p-4 rounded-2xl shadow-2xl z-20 w-64 border border-slate-100 dark:border-white/10 ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-200">
+              <p className="text-xs font-bold uppercase tracking-wider mb-3 text-slate-500 dark:text-slate-400">Melody Style</p>
+              <div className="flex gap-2 mb-3">
+                <select value={melodyStyle} onChange={e => setMelodyStyle(e.target.value)} className="w-full bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl text-sm p-2 focus:ring-2 focus:ring-[#fbbf24] outline-none">
                   {MELODY_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-              <button onClick={handleGenerateMelody} className="w-full bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold py-1 px-3 rounded-md transition-colors">
+              <button onClick={handleGenerateMelody} className="w-full bg-[#fbbf24] hover:bg-[#fcd34d] text-black text-sm font-bold py-2 px-3 rounded-xl transition-colors shadow-lg shadow-amber-500/20">
                 Generate
               </button>
             </div>
@@ -309,22 +318,28 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+      {/* Chord Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center py-2">
         {progression.chords.map((chord, index) => {
           const chordColors = getChordColor(chord);
           const isHighlighted = highlightedIndex === index;
           return (
-            <div key={`${chord}-${index}`} className="flex flex-col items-center gap-2">
+            <div key={`${chord}-${index}`} className="flex flex-col items-center gap-4 group/chord">
                  <button
-                    onClick={() => playChord(chord, instrumentType)} // Pass instrumentType
-                    className={`w-full p-4 rounded-lg text-center focus:outline-none transition-all duration-150 ease-in-out shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-100 cursor-pointer group border ${chordColors.button} ${isHighlighted ? 'ring-2 ring-offset-2 ring-sky-400 ring-offset-white dark:ring-offset-slate-800' : 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800'}`}
+                    onClick={() => playChord(chord, instrumentType)} 
+                    className={`
+                        w-full aspect-square rounded-[2rem] flex flex-col items-center justify-center
+                        transition-all duration-300 ease-out cursor-pointer relative overflow-hidden
+                        ${chordColors.button}
+                        ${isHighlighted ? `ring-2 ring-[#fbbf24] scale-105 ${chordColors.glow}` : 'hover:scale-[1.02]'}
+                    `}
                     aria-label={`Play chord ${chord}`}
-                    title={`Play ${chord} chord`}
                   >
-                    <div className={`text-2xl font-bold transition-colors ${chordColors.text}`}>{chord}</div>
-                    <div className="text-lg text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">{progression.romanNumerals[index]}</div>
+                     <div className={`absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none`} />
+                    <div className={`text-3xl sm:text-4xl font-black tracking-tight mb-1 relative z-10 ${chordColors.text} ${isHighlighted ? 'scale-110' : ''} transition-transform`}>{chord}</div>
+                    <div className="text-sm font-medium text-slate-500 dark:text-slate-400 relative z-10">{progression.romanNumerals[index]}</div>
                 </button>
-                <div className="w-full">
+                <div className="w-full h-24 opacity-60 hover:opacity-100 transition-opacity">
                     {visualAid === 'guitar' && <GuitarChordDiagram chordName={chord} />}
                     {visualAid === 'piano' && <PianoChordDiagram chordName={chord} />}
                 </div>
@@ -333,15 +348,17 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
         })}
       </div>
       
-      <div className="mt-4 p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg flex items-center justify-between flex-wrap gap-4">
+      {/* Controls Bar */}
+      <div className="bg-slate-50/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-4 backdrop-blur-sm">
           <div className="flex items-center gap-3">
               <button 
                 onClick={() => onTogglePlay(progression.id)} 
                 title={isPlaying ? "Stop Progression" : "Play Progression"}
-                className="p-2 bg-sky-600 hover:bg-sky-700 text-white rounded-full transition-transform active:scale-90"
+                className={`p-3 rounded-full transition-all shadow-lg active:scale-95 ${isPlaying ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/30' : 'bg-[#fbbf24] hover:bg-[#fcd34d] text-black shadow-amber-500/30'}`}
               >
-                  {isPlaying ? <StopIcon className="h-6 w-6"/> : <PlayIcon className="h-6 w-6"/>}
+                  {isPlaying ? <StopIcon className="h-6 w-6"/> : <PlayIcon className="h-6 w-6 pl-0.5"/>}
               </button>
+              <div className="w-px h-8 bg-slate-300 dark:bg-white/10 mx-1"></div>
               <ToggleButton active={isLooping} onToggle={() => setIsLooping(!isLooping)} title="Toggle Loop">
                   <LoopIcon className="h-5 w-5"/>
               </ToggleButton>
@@ -352,69 +369,72 @@ const ProgressionCard: React.FC<ProgressionCardProps> = ({
                   <DrumIcon className="h-5 w-5"/>
               </ToggleButton>
               <ToggleButton active={isArpeggioChordsOn} onToggle={() => setIsArpeggioChordsOn(!isArpeggioChordsOn)} title="Toggle Arpeggiated Chords">
-                  Arpeggio
+                  <span className="text-xs font-bold px-1">ARP</span>
               </ToggleButton>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Sound:</span>
-            <ToggleButton active={instrumentType === 'synth'} onToggle={() => setInstrumentType('synth')} title="Synth Sound">
-                Synth
-            </ToggleButton>
-            <ToggleButton active={instrumentType === 'piano'} onToggle={() => setInstrumentType('piano')} title="Piano Sound">
-                Piano
-            </ToggleButton>
+          
+          <div className="flex items-center gap-4">
+             {/* Instrument Toggle */}
+             <div className="flex bg-slate-200/50 dark:bg-black/30 p-1 rounded-xl border border-slate-300/50 dark:border-white/5">
+                <button onClick={() => setInstrumentType('synth')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${instrumentType === 'synth' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-500'}`}>Synth</button>
+                <button onClick={() => setInstrumentType('piano')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${instrumentType === 'piano' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-500'}`}>Piano</button>
+             </div>
+
+             {/* Visual Aid Toggle */}
+             <div className="flex bg-slate-200/50 dark:bg-black/30 p-1 rounded-xl border border-slate-300/50 dark:border-white/5">
+                  <button onClick={() => setVisualAid('none')} title="Hide" className={`p-1.5 rounded-lg transition-colors ${visualAid === 'none' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-slate-500'}`}><EyeOffIcon className="h-4 w-4"/></button>
+                  <button onClick={() => setVisualAid('guitar')} title="Guitar" className={`p-1.5 rounded-lg transition-colors ${visualAid === 'guitar' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-slate-500'}`}><GuitarIcon className="h-4 w-4"/></button>
+                  <button onClick={() => setVisualAid('piano')} title="Piano" className={`p-1.5 rounded-lg transition-colors ${visualAid === 'piano' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-slate-500'}`}><PianoIcon className="h-4 w-4"/></button>
+             </div>
           </div>
-          <div className="flex items-center gap-2">
-             <ToggleButton active={visualAid === 'none'} onToggle={() => setVisualAid('none')} title="Hide Visual Aid">
-                  <EyeOffIcon className="h-5 w-5"/>
-              </ToggleButton>
-              <ToggleButton active={visualAid === 'guitar'} onToggle={() => setVisualAid('guitar')} title="Show Guitar Chords">
-                  <GuitarIcon className="h-5 w-5"/>
-              </ToggleButton>
-               <ToggleButton active={visualAid === 'piano'} onToggle={() => setVisualAid('piano')} title="Show Piano Chords">
-                  <PianoIcon className="h-5 w-5"/>
-              </ToggleButton>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-              <label htmlFor={`tempo-${progression.id}`} className="font-medium">Tempo</label>
+
+          <div className="flex items-center gap-3">
+              <span className="text-xs font-bold uppercase text-slate-400">Tempo</span>
               <input 
-                id={`tempo-${progression.id}`}
                 type="range" 
                 min="40" 
                 max="240" 
-                value={globalTempo} // Use globalTempo
-                onChange={e => setGlobalTempo(Number(e.target.value))} // Set globalTempo
-                className="w-24 accent-sky-500"
+                value={globalTempo} 
+                onChange={e => setGlobalTempo(Number(e.target.value))} 
+                className="w-24 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full appearance-none cursor-pointer accent-[#fbbf24]"
               />
-              <span className="font-mono w-8 text-center">{globalTempo}</span> {/* Display globalTempo */}
-              <span>BPM</span>
+              <span className="font-mono text-xs font-bold w-8 text-right text-slate-600 dark:text-slate-300">{globalTempo}</span>
           </div>
       </div>
       
-      <div className="mt-2 bg-slate-100 dark:bg-slate-700/50 p-4 rounded-lg flex items-start gap-3">
-        <InfoIcon className="h-5 w-5 text-sky-600 dark:text-sky-400 flex-shrink-0 mt-0.5" />
-        <p className="text-slate-700 dark:text-slate-300 text-sm">{progression.tips}</p>
+      {/* Tips */}
+      <div className="flex items-start gap-3 text-slate-600 dark:text-slate-300 text-sm leading-relaxed bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-500/10">
+        <InfoIcon className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+        <p>{progression.tips}</p>
       </div>
 
+      {/* Melody Section */}
       {progression.melody && (
-        <div className="mt-2 flex flex-col gap-3">
-            <h4 className="font-bold text-sky-700 dark:text-sky-300">Generated Melody ({progression.melody.style})</h4>
-            <div className="bg-slate-200 dark:bg-slate-900 p-4 rounded-lg text-center font-mono tracking-wider flex flex-wrap justify-center gap-x-2 gap-y-1">
+        <div className="mt-2 flex flex-col gap-4 animate-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center gap-2">
+                 <div className="h-px flex-grow bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent"></div>
+                 <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">Melody ({progression.melody.style})</h4>
+                 <div className="h-px flex-grow bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent"></div>
+            </div>
+            
+            <div className="bg-white/50 dark:bg-black/20 p-6 rounded-2xl border border-slate-200 dark:border-white/5 text-center flex flex-wrap justify-center gap-x-3 gap-y-2 shadow-inner">
                 {progression.melody.notes.map((note, idx) => (
                     <span 
                         key={`melody-note-${idx}`}
-                        className={`text-sky-700 dark:text-sky-400 text-lg sm:text-xl transition-colors duration-75 ${
-                            highlightedMelodyNoteIndex === idx ? 'font-bold text-sky-900 dark:text-sky-100 scale-105' : ''
+                        className={`text-xl sm:text-2xl font-mono transition-all duration-100 ${
+                            highlightedMelodyNoteIndex === idx 
+                                ? 'text-[#fbbf24] font-bold scale-125 shadow-amber-500/50 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]' 
+                                : 'text-slate-700 dark:text-slate-400'
                         }`}
                     >
                         {note}
-                        {idx < progression.melody.notes.length - 1 && <span className="text-slate-400 dark:text-slate-600 px-1">-</span>}
+                        {idx < progression.melody.notes.length - 1 && <span className="text-slate-300 dark:text-white/10 mx-2 text-base">•</span>}
                     </span>
                 ))}
             </div>
-             <div className="bg-slate-100 dark:bg-slate-700/50 p-4 rounded-lg flex items-start gap-3">
-                <MusicNoteIcon className="h-5 w-5 text-sky-600 dark:text-sky-400 flex-shrink-0 mt-0.5" />
-                <p className="text-slate-700 dark:text-slate-300 text-sm">{progression.melody.tips}</p>
+             <div className="flex items-start gap-3 text-slate-600 dark:text-slate-300 text-sm leading-relaxed bg-purple-50/50 dark:bg-purple-900/10 p-4 rounded-2xl border border-purple-100 dark:border-purple-500/10">
+                <MusicNoteIcon className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                <p>{progression.melody.tips}</p>
             </div>
         </div>
       )}

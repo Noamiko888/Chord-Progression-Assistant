@@ -1,5 +1,5 @@
 {
-  "name": "Chord Progression Assistant",
+  "name": "Manolo - An AI Chord Progression Assistant",
   "description": "An interactive music tutoring and songwriting assistant that helps musicians explore chord progressions. Select a key and mode to get AI-generated progressions with mood descriptions, harmony tips, and options to generate variations or transpose.",
   "requestFramePermissions": []
 }
