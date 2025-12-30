@@ -1,47 +1,43 @@
-# AI Chord Progression Assistant
+# Manolo - AI Chord Progression Assistant
 
-An interactive music tutoring and songwriting assistant powered by Google's Gemini AI. This application helps musicians, songwriters, and students explore chord progressions, understand music theory, and spark creative ideas through an intuitive, web-based interface.
+**Manolo** is an interactive music tutoring and songwriting assistant powered by Google's Gemini 2.5 Flash model. It helps musicians, songwriters, and students explore chord progressions, understand music theory, and spark creative ideas through a beautiful, dark-themed web interface.
 
-## 🎵 Features
+## ✨ Features
 
-### AI-Powered Generation
-*   **Key & Mode Generation:** Generate musically sound chord progressions based on a specific root note and mode (Major, Minor, Dorian, Phrygian, etc.).
-*   **Mood Search:** Find progressions by describing a feeling (e.g., "Nostalgic sunset," "Cyberpunk chase," "Melancholy jazz").
-*   **Smart Variations:** Create creative variations of existing progressions using chord substitutions and reordering.
-*   **Melody Generation:** AI-composed melodic phrases to accompany your chords in various styles (Simple, Complex, Rhythmic).
-*   **Intelligent Transposition:** Instantly transpose progressions to any key with accurate Roman numeral analysis.
+### 🧠 AI-Powered Generation
+*   **Harmonic Exploration:** Generate musically sound chord progressions based on a specific root note and mode (Major, Minor, Dorian, Phrygian, etc.).
+*   **Mood-Based Discovery:** Describe a vibe (e.g., "Cyberpunk City," "Nostalgic Summer") to get tailored chord sequences.
+*   **Creative Variations:** Ask Manolo to generate variations of a progression to break out of writer's block.
+*   **Melody Composition:** Generate short, harmonically appropriate melodic phrases with performance tips.
+*   **Smart Transposition:** Instantly transpose progressions to any key with updated Roman numeral analysis.
 
-### Interactive Playback Engine
-*   **Web Audio API Engine:** Custom-built audio synthesis (no heavy external samples required).
-*   **Dual Instruments:** Switch between a warm **Piano** sound and a modern **Synth**.
+### 🎹 Interactive Playback Engine
+*   **Web Audio API:** High-performance, low-latency audio synthesis directly in the browser.
+*   **Dual Instrument Modes:** Switch between a warm **Piano** and a modern **Synth** sound.
 *   **Rhythmic Tools:**
-    *   **Metronome:** Keep time with visual and audio cues.
-    *   **Drum Backing:** Simple rock/pop beat generation.
-    *   **Arpeggiator:** Play chords as broken notes for a different texture.
-*   **Tempo Control:** Adjustable BPM (40-240) for all playback modes.
-*   **Looping:** Seamlessly loop progressions for practicing improvisation.
+    *   **Metronome:** Adjustable click track.
+    *   **Drum Backing:** Generative drum patterns (Kick/Snare/Hi-hat) to play along with.
+    *   **Arpeggiator:** Automatically arpeggiate chords for a flowing texture.
+*   **Looping & Tempo:** Seamless looping with adjustable BPM (40-240).
 
-### Visual Learning Tools
-*   **Chord Diagrams:** Dynamic SVG rendering for:
-    *   **Guitar:** Fingering charts including open and muted strings.
+### 🎸 Visual Learning Tools
+*   **Chord Diagrams:**
+    *   **Guitar:** Accurate fingering charts including open and muted strings.
     *   **Piano:** Keyboard visualization highlighting specific keys.
-*   **Real-time Highlighting:** Visual cues follow the playback beat by beat.
-*   **Roman Numeral Analysis:** Learn the function of each chord (e.g., ii - V - I).
-*   **Theory Tips:** Context-aware tips provided by Gemini for every progression and melody.
+*   **Real-time Visualization:** Watch chords light up as they play.
+*   **Roman Numeral Analysis:** Understand harmonic function (e.g., ii - V - I).
 
-### User Experience
-*   **History System:** Save your favorite progressions to LocalStorage to revisit them later.
-*   **Dark/Light Mode:** Fully responsive UI with automatic system preference detection and manual toggle.
-*   **Responsive Design:** Works smoothly on desktop and mobile devices.
+### 💾 Personal Library
+*   **History:** Automatically saves generated progressions.
+*   **Favorites:** Bookmark your favorite progressions to LocalStorage.
+*   **Search & Sort:** Filter your history by key, mood, or date.
 
 ## 🛠️ Tech Stack
 
-*   **Frontend Framework:** React 19
-*   **Language:** TypeScript
-*   **Styling:** Tailwind CSS
-*   **AI Model:** Google Gemini 2.5 Flash (via `@google/genai` SDK)
-*   **Audio:** Native Web Audio API (Oscillators, Gain nodes, Filters)
-*   **Icons:** Custom SVG components
+*   **Frontend:** React 19, TypeScript
+*   **Styling:** Tailwind CSS (Custom "Manolo" Dark/Amber theme)
+*   **AI Integration:** Google Gemini API (`@google/genai`)
+*   **Audio:** Native Web Audio API (No external sample libraries required)
 
 ## 🚀 Getting Started
 
@@ -55,8 +51,8 @@ An interactive music tutoring and songwriting assistant powered by Google's Gemi
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/chord-progression-assistant.git
-    cd chord-progression-assistant
+    git clone https://github.com/yourusername/manolo-chord-assistant.git
+    cd manolo-chord-assistant
     ```
 
 2.  **Install dependencies:**
@@ -64,38 +60,38 @@ An interactive music tutoring and songwriting assistant powered by Google's Gemi
     npm install
     ```
 
-3.  **Configure Environment Variables:**
-    Create a `.env` file in the root directory and add your Google Gemini API key:
+3.  **Environment Setup (Crucial for Security):**
+    
+    Create a `.env` file in the root directory of the project.
+    
+    ```bash
+    touch .env
+    ```
+
+    Add your Google Gemini API key to this file:
+    
     ```env
     API_KEY=your_actual_api_key_here
     ```
-    *Note: The application expects the API key to be available via `process.env.API_KEY`.*
+
+    > **⚠️ IMPORTANT:** Ensure `.env` is listed in your `.gitignore` file to prevent your API key from being exposed to the public repository.
 
 4.  **Run the development server:**
     ```bash
     npm run dev
     ```
 
-## 📂 Project Structure
+## 🛡️ Security Note
 
-*   **`/components`**: UI components (Controls, ProgressionCard, Visual Aids, Icons).
-*   **`/services`**: Integration with Google Gemini API (`geminiService.ts`).
-*   **`/utils`**:
-    *   `audio.ts`: Web Audio API logic for synth/piano synthesis.
-    *   `chords-library.ts`: Data structures for guitar chord voicings.
-    *   `colors.ts`: Dynamic color mapping for chord buttons.
-*   **`types.ts`**: TypeScript interfaces for data models.
-*   **`constants.ts`**: Musical constants (Notes, Modes, Styles).
-
-## 🎹 Music Theory Implementation
-
-The app uses standard Western music theory conventions:
-*   **Audio:** Pitch calculation uses Equal Temperament based on A4 = 440Hz.
-*   **Chord Colors:** Uses a color-coding system (Circle of Fifths adjacency) to visually distinguish root notes.
-*   **Voicings:**
-    *   Piano visualizations display 2 octaves.
-    *   Guitar diagrams utilize standard open chord positions where possible.
+This application uses the `process.env.API_KEY` to access the Google Gemini API.
+*   **Never** commit your `.env` file to version control.
+*   For production deployments, set the `API_KEY` as an environment variable in your hosting provider's settings (e.g., Vercel, Netlify).
 
 ## 📄 License
 
-This project is open-source and available under the MIT License.
+This project is licensed under the MIT License.
+
+## 🙏 Acknowledgments
+
+*   Powered by [Google Gemini](https://deepmind.google/technologies/gemini/)
+*   UI Icons by [Heroicons](https://heroicons.com/)
